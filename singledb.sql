@@ -5,7 +5,7 @@
  *
  * It doesn't pre-fetch the following:
  * 1. Toast tables [RDS limitation] - No workaround
- * 2. Indexes [pg_prewarm limitation] - No workaround
+ * ~~2. Indexes [pg_prewarm limitation] - No workaround~~ Evidently relkind expansion did the job
  * 3. DB Objects owned by other users [RDS limitation]
  * 3a. Workaround: Re-run SQL as other User
  */
