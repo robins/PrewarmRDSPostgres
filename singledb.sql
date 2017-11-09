@@ -9,6 +9,7 @@
  * 2a. Workaround: Re-run SQL as other User
  */
 
+SET statement_timeout TO 0;
 CREATE EXTENSION IF NOT EXISTS pg_prewarm;
 
       SELECT clock_timestamp(), pg_prewarm(c.oid::regclass), 
@@ -22,3 +23,4 @@ CREATE EXTENSION IF NOT EXISTS pg_prewarm;
       ORDER BY c.relpages DESC;
    
 DROP EXTENSION IF EXISTS pg_prewarm;
+SET statement_timeout TO DEFAULT;
