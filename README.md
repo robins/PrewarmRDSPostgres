@@ -12,3 +12,16 @@ Notably, the only exception here is that RDS Postgres doesn't allow direct acces
 
 ### SingleDB.SQL ###
 When this SQL is run against each Database in an RDS Postgres Instance, it forces the Disk-Block Initialization for all (possible) Database Objects owned by the User that it is run as.
+
+On a sample run (run on a pgbench database), my RDS Postgres instance returns this:
+
+|        clock_timestamp        | table_size | freespace_map_size | visibility_map_size | blocks_prefetched | current_database | schema_name |      table_name       |
+|-------------------------------|------------|--------------------|---------------------|-------------------|------------------|-------------|-----------------------|
+| 2017-11-16 23:24:07.197221-05 | 13 GB      | 3240 kB            | 408 kB              |           1639801 | pgbench          | public      | pgbench_accounts      |
+| 2017-11-16 23:27:36.333857-05 | 2142 MB    | 0 bytes            | 0 bytes             |            274194 | pgbench          | public      | pgbench_accounts_pkey |
+| 2017-11-16 23:28:11.488585-05 | 440 kB     | 24 kB              | 8192 bytes          |                59 | pgbench          | public      | pgbench_tellers       |
+| 2017-11-16 23:28:11.490687-05 | 240 kB     | 0 bytes            | 0 bytes             |                30 | pgbench          | public      | pgbench_tellers_pkey  |
+| 2017-11-16 23:28:11.494527-05 | 40 kB      | 0 bytes            | 0 bytes             |                 5 | pgbench          | public      | pgbench_branches_pkey |
+| 2017-11-16 23:28:11.496651-05 | 40 kB      | 24 kB              | 8192 bytes          |                 9 | pgbench          | public      | pgbench_branches      |
+| 2017-11-16 23:28:11.496708-05 | 0 bytes    | 0 bytes            | 0 bytes             |                 0 | pgbench          | public      | pgbench_history       |
+(7 rows)
