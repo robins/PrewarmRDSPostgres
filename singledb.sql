@@ -1,12 +1,19 @@
 /*
  * This Script allows an an RDS User to pre-fetch most of the Database
- * objects (owned by the user that triggers the SQL) to Cache, which 
- * effectively reduces the effect of Lazy Loading seen on AWS EBS.
- *
- * It doesn't pre-fetch the following:
- * 1. Toast tables [RDS limitation] - No workaround
- * 2. DB Objects owned by other users [RDS limitation, since SuperUser access is not available]
- * 2a. Workaround: Re-run SQL once for each Database User that owns any Database Object.
+ * objects (owned by the user that triggers the SQL) to Cache.
+ * 
+ * Although large databases may get some objects evicted out of cache
+ * this SQL is highly beneficial for RDS PostgreSQL users who have recently
+ * Restored their RDS Instances from a Snapshot and need a way to touch all
+ * disk-blocks to remove all Lazy Load related side-effects when the 
+ * production workload is sent through.
+ * 
+ * However, it doesn't pre-fetch Large-Object tables owing to an RDS 
+ * limitation. There is "No workaround" for this (i.e. first fetch of a 
+ * Large-Object would experience Lazy Load related side-effects)
+ * 
+ * Importantly, do note that for best results, this Script needs to be run 
+ * once per DB User, per Database, per RDS Instance.
  */
 
 SET statement_timeout TO 0;
