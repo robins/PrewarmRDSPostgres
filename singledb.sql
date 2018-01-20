@@ -39,7 +39,6 @@ CREATE EXTENSION IF NOT EXISTS pg_prewarm;
           ON u.usesysid = c.relowner
       WHERE u.usename NOT IN ('rdsadmin', 'rdsrepladmin', ' pg_signal_backend', 'rds_superuser', 'rds_replication')
         AND c.relkind IN ('r', 'i')
-        AND c.relname NOT ILIKE 'pg_toast%'
       ORDER BY c.relpages DESC;
 
 DROP EXTENSION IF EXISTS pg_prewarm;
