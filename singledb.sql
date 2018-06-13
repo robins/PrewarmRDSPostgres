@@ -13,7 +13,8 @@
  * Large-Object would experience Lazy Load related side-effects)
  * 
  * Importantly, do note that for best results, this Script needs to be run 
- * once per DB User, per Database, per RDS Instance.
+ * once per DB User, per Database, per RDS Instance. Further, it needs to be
+ * run by the DB User that has SELECT permissions on all DB Objects.
  */
 
 SET statement_timeout TO 0;
