@@ -33,7 +33,7 @@ CREATE EXTENSION IF NOT EXISTS pg_prewarm;
          ) as Blocks_Prefetched,
         current_database(),
         n.nspname AS schema_name,
-        c.relname AS table_name
+        c.relname AS relation_name
       FROM pg_class c
         JOIN pg_namespace n
           ON n.oid = c.relnamespace
