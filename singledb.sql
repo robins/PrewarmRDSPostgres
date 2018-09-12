@@ -20,28 +20,35 @@
 SET statement_timeout TO 0;
 CREATE EXTENSION IF NOT EXISTS pg_prewarm;
 
-      SELECT 
-        clock_timestamp(),
-        pg_size_pretty(pg_relation_size(c.oid::regclass)) AS Table_Size,
-        pg_size_pretty(pg_relation_size(c.oid::regclass, 'fsm')) AS FreeSpace_Map_Size,
-        pg_size_pretty(pg_relation_size(c.oid::regclass, 'vm')) AS Visibility_Map_Size,
-        (SELECT 
-          pg_prewarm(c.oid::regclass, 'prefetch', 'main') +
-          CASE WHEN pg_relation_size(c.oid::regclass, 'fsm') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'fsm') ELSE 0 END +
-          CASE WHEN pg_relation_size(c.oid::regclass, 'vm') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'vm') ELSE 0 END + 
-          CASE WHEN c.relpersistence = 'u' THEN pg_prewarm(c.oid::regclass, 'prefetch', 'init') ELSE 0 END
-         ) as Blocks_Prefetched,
-        current_database(),
-        n.nspname AS schema_name,
-        c.relname AS relation_name
-      FROM pg_class c
-        JOIN pg_namespace n
-          ON n.oid = c.relnamespace
-        JOIN pg_user u
-          ON u.usesysid = c.relowner
-      WHERE u.usename NOT IN ('rdsadmin', 'rdsrepladmin', ' pg_signal_backend', 'rds_superuser', 'rds_replication')
-        AND c.relkind IN ('r', 'i')
-      ORDER BY c.relpages DESC;
+WITH y AS (
+  SELECT oid, aclist
+  FROM (
+    SELECT oid, relowner, unnest(relacl)::TEXT as aclist
+    FROM pg_class
+    WHERE relacl IS NOT NULL
+  ) a
+  WHERE aclist ILIKE current_user || '%'
+) SELECT
+    clock_timestamp(),
+    pg_size_pretty(pg_relation_size(c.oid::regclass)) AS Table_Size,
+    pg_size_pretty(pg_relation_size(c.oid::regclass, 'fsm')) AS FreeSpace_Map_Size,
+    pg_size_pretty(pg_relation_size(c.oid::regclass, 'vm')) AS Visibility_Map_Size,
+    (SELECT 
+      CASE WHEN pg_relation_size(c.oid::regclass, 'main') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'main') ELSE 0 END +
+      CASE WHEN pg_relation_size(c.oid::regclass, 'fsm') > 0  THEN pg_prewarm(c.oid::regclass, 'prefetch', 'fsm')  ELSE 0 END +
+      CASE WHEN pg_relation_size(c.oid::regclass, 'vm') > 0   THEN pg_prewarm(c.oid::regclass, 'prefetch', 'vm')   ELSE 0 END + 
+      CASE WHEN pg_relation_size(c.oid::regclass, 'init') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'init') ELSE 0 END
+     ) as Blocks_Prefetched,
+    current_database(),
+    n.nspname AS schema_name,
+    c.relname AS relation_name
+  FROM pg_catalog.pg_class c
+    LEFT JOIN y ON y.oid = c.oid
+    LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+  WHERE c.relkind IN ('r', 'v', 'm', 'S', 'f')
+    AND pg_catalog.pg_table_is_visible(c.oid)
+    AND (y.oid IS NOT NULL OR EXISTS (select 1 from pg_roles where rolname = current_user and c.relowner = pg_roles.oid LIMIT 1))
+  ORDER BY c.relpages DESC;;
 
 DROP EXTENSION IF EXISTS pg_prewarm;
 SET statement_timeout TO DEFAULT;
