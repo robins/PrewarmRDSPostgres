@@ -28,7 +28,8 @@ CREATE EXTENSION IF NOT EXISTS pg_prewarm;
         (SELECT 
           pg_prewarm(c.oid::regclass, 'prefetch', 'main') +
           CASE WHEN pg_relation_size(c.oid::regclass, 'fsm') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'fsm') ELSE 0 END +
-          CASE WHEN pg_relation_size(c.oid::regclass, 'vm') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'vm') ELSE 0 END
+          CASE WHEN pg_relation_size(c.oid::regclass, 'vm') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'vm') ELSE 0 END + 
+          CASE WHEN c.relpersistence = 'u' THEN pg_prewarm(c.oid::regclass, 'prefetch', 'init') ELSE 0 END
          ) as Blocks_Prefetched,
         current_database(),
         n.nspname AS schema_name,
