@@ -1,20 +1,30 @@
 /*
- * This Script allows an an RDS User to pre-fetch most of the Database
- * objects (owned by the user that triggers the SQL) to Cache.
- * 
- * Although large databases may get some objects evicted out of cache
- * this SQL is highly beneficial for RDS PostgreSQL users who have recently
- * Restored their RDS Instances from a Snapshot and need a way to touch all
- * disk-blocks to remove all Lazy Load related side-effects when the 
- * production workload is sent through.
- * 
- * However, it doesn't pre-fetch Large-Object tables owing to an RDS 
+ * This Script allows an RDS User to avoid the negative side-effects of
+ * the Lazy Loading feature of EBS (See Reference [1]).
+ *
+ * When an RDS Postgres instance is restored from an existing Snapshot,
+ * the Lazy Loading feature of EBS allows one to launch a 16TB instance in
+ * a matter of mintues. The flip-side to that feature, is that the first 
+ * fetch (of each disk-block) requested by RDS Postgres, is going to be a
+ * fetch from S3 which in-turn is a high-latency operation.
+ *
+ * This SQL Script prefetches all disk-blocks which although would experience
+ * this issue too, however, once run an actual SQL Workload immediately 
+ * thereafter should not see these high-latency side-effects.
+ *
+ * Additionally, it is possible that (for various reasons) the disk-blocks
+ * asssociated to a datbase object being prefetched may get evicted 
+ * (from memory) soon after, but this is still helpful, since the lazy-loading
+ * side-effects can be guaranteed to have been resolved by then.
+ *
+ * Moreover, it doesn't prefetch Large-Object tables owing to an RDS 
  * limitation. There is "No workaround" for this (i.e. first fetch of a 
  * Large-Object would experience Lazy Load related side-effects)
  * 
- * Importantly, do note that for best results, this Script needs to be run 
- * once per DB User, per Database, per RDS Instance. Further, it needs to be
- * run by the DB User that has SELECT permissions on all DB Objects.
+ * Importantly, do note that owing to how database object permissions work, this
+ * Script needs to be run once per DB User as well as per Database.
+ *
+ * [1] EBS Lazy Loading: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-restoring-volume.html
  */
 
 SET statement_timeout TO 0;
