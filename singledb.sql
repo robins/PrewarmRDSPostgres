@@ -17,6 +17,11 @@
  * RDS instance immediately thereafter can be guaranteed to not see these
  * side-effects.
  *
+ * Notably, it tries to fetch all the following (associated to a DB User):
+ * 1) Table / Materialized View etc.
+ * 2) TOAST data (if any, related to the above relations)
+ * 3) Large Objects (if any, associated to the current user)
+ *
  * Importantly, do note that owing to how Postgres object permissions work,
  * this Script needs to be run once each per DB User / per Database. This can
  * be run in parallel (although the idea is to ensure that they all run
