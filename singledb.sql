@@ -1,19 +1,26 @@
 /*
- * This Script allows an RDS User to avoid the negative side-effects of
- * the Lazy Loading feature of EBS (See Reference [1]).
+ * Brief: This Script allows an RDS Postgres User to remove latency related
+ * side-effects of the Lazy Loading feature of EBS when subjecting it
+ * to actual Production Workload.
  *
- * When an RDS Postgres instance is restored from an existing Snapshot,
- * the Lazy Loading feature of EBS allows one to launch a 16TB instance in
- * a matter of mintues. The flip-side to that feature, is that the first 
- * fetch (of each disk-block) requested by RDS Postgres, is going to be a
- * fetch from S3 which in-turn is a high-latency operation.
+ * You can read more about the Lazy Loading feature of EBS here[1].
  *
- * This SQL Script prefetches all disk-blocks which although would experience
- * this issue too, however, once run an actual SQL Workload immediately 
- * thereafter should not see these high-latency side-effects.
+ * Background: When an RDS Postgres instance is restored from an existing
+ * Snapshot, the Lazy Loading feature of EBS allows one to launch any instance
+ * (even as large as 16 TB) in a matter of mintues. The flip-side to that 
+ * feature, is the first fetch (of each disk-block) requested by RDS Postgres,
+ * is going to be fetched from S3, which in-turn is a high-latency operation.
  *
- * Importantly, do note that owing to how database object permissions work, this
- * Script needs to be run once per DB User as well as per Database.
+ * This SQL Script can be used to prefetch all disk-blocks of a recently
+ * restored RDS Postgres Instance, which although would also experience
+ * lazy-loading related side-effects, however, production workload sent to the
+ * RDS instance immediately thereafter can be guaranteed to not see these
+ * side-effects.
+ *
+ * Importantly, do note that owing to how Postgres object permissions work,
+ * this Script needs to be run once each per DB User / per Database. This can
+ * be run in parallel (although the idea is to ensure that they all run
+ * successfully, i.e. give an output at the end).
  *
  * [1] EBS Lazy Loading: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-restoring-volume.html
  */
