@@ -43,6 +43,7 @@ WITH y AS (
     pg_size_pretty(pg_relation_size(c.oid::regclass)) AS Table_Size,
     pg_size_pretty(pg_relation_size(c.oid::regclass, 'fsm')) AS FreeSpace_Map_Size,
     pg_size_pretty(pg_relation_size(c.oid::regclass, 'vm')) AS Visibility_Map_Size,
+    pg_size_pretty(pg_relation_size(c.oid::regclass, 'init')) AS Init_Size,
     (SELECT 
       CASE WHEN pg_relation_size(c.oid::regclass, 'main') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'main') ELSE 0 END +
       CASE WHEN pg_relation_size(c.oid::regclass, 'fsm') > 0  THEN pg_prewarm(c.oid::regclass, 'prefetch', 'fsm')  ELSE 0 END +
