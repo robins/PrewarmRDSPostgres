@@ -19,8 +19,8 @@
  *
  * Notably, it tries to fetch all the following (associated to a DB User):
  * 1) Table / Materialized View etc.
- * 2) TOAST data (if any, related to the above relations)
- * 3) Large Objects (if any, associated to the current user)
+ * 2) TOAST data related to the above relations (if any)
+ * 3) Large Objects (if any)
  *
  * Importantly, do note that owing to how Postgres object permissions work,
  * this Script needs to be run once each per DB User / per Database. This can
