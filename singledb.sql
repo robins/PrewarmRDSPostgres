@@ -7,7 +7,7 @@
  *
  * Background: When an RDS Postgres instance is restored from an existing
  * Snapshot, the Lazy Loading feature of EBS allows one to launch any instance
- * (even as large as 16 TB) in a matter of mintues. The flip-side to that 
+ * (even as large as 16 TB) in a matter of minutes. The flip-side to that 
  * feature, is the first fetch (of each disk-block) requested by RDS Postgres,
  * is going to be fetched from S3, which in-turn is a high-latency operation.
  *
