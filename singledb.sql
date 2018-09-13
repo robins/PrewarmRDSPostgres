@@ -38,7 +38,8 @@ WITH y AS (
     WHERE relacl IS NOT NULL
   ) a
   WHERE aclist ILIKE current_user || '%'
-) SELECT
+)
+ SELECT
     clock_timestamp(),
     pg_size_pretty(pg_relation_size(c.oid::regclass)) AS Table_Size,
     pg_size_pretty(pg_relation_size(c.oid::regclass, 'fsm')) AS FreeSpace_Map_Size,
@@ -59,7 +60,24 @@ WITH y AS (
   WHERE c.relkind IN ('r', 'v', 'm', 'S', 'f')
     AND pg_catalog.pg_table_is_visible(c.oid)
     AND (y.oid IS NOT NULL OR EXISTS (select 1 from pg_roles where rolname = current_user and c.relowner = pg_roles.oid LIMIT 1))
-  ORDER BY c.relpages DESC;;
+
+UNION ALL
+
+  SELECT 
+    clock_timestamp(),
+    pg_size_pretty(octet_length(string_agg(lo_get(lo.oid),''))::bigint) AS Table_Size,
+    pg_size_pretty(0::BIGINT), 
+    pg_size_pretty(0::BIGINT), 
+    pg_size_pretty(0::BIGINT), 
+    0,
+    current_database(),
+    NULL,
+    'User''s large objects' AS relation_name
+    FROM pg_largeobject_metadata lo
+      JOIN pg_roles
+        ON rolname = current_user
+          AND lomowner = pg_roles.oid
+ORDER BY 1, 6 DESC;
 
 DROP EXTENSION IF EXISTS pg_prewarm;
 SET statement_timeout TO DEFAULT;
