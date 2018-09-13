@@ -17,10 +17,6 @@
  * (from memory) soon after, but this is still helpful, since the lazy-loading
  * side-effects can be guaranteed to have been resolved by then.
  *
- * Moreover, it doesn't prefetch Large-Object tables owing to an RDS 
- * limitation. There is "No workaround" for this (i.e. first fetch of a 
- * Large-Object would experience Lazy Load related side-effects)
- * 
  * Importantly, do note that owing to how database object permissions work, this
  * Script needs to be run once per DB User as well as per Database.
  *
@@ -51,7 +47,6 @@ WITH y AS (
       CASE WHEN pg_relation_size(c.oid::regclass, 'vm') > 0   THEN pg_prewarm(c.oid::regclass, 'prefetch', 'vm')   ELSE 0 END + 
       CASE WHEN pg_relation_size(c.oid::regclass, 'init') > 0 THEN pg_prewarm(c.oid::regclass, 'prefetch', 'init') ELSE 0 END
      ) as Blocks_Prefetched,
-    current_database(),
     n.nspname AS schema_name,
     c.relname AS relation_name
   FROM pg_catalog.pg_class c
@@ -70,7 +65,6 @@ UNION ALL
     pg_size_pretty(0::BIGINT), 
     pg_size_pretty(0::BIGINT), 
     0,
-    current_database(),
     NULL,
     'User''s large objects' AS relation_name
     FROM pg_largeobject_metadata lo
