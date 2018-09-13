@@ -12,11 +12,6 @@
  * this issue too, however, once run an actual SQL Workload immediately 
  * thereafter should not see these high-latency side-effects.
  *
- * Additionally, it is possible that (for various reasons) the disk-blocks
- * asssociated to a datbase object being prefetched may get evicted 
- * (from memory) soon after, but this is still helpful, since the lazy-loading
- * side-effects can be guaranteed to have been resolved by then.
- *
  * Importantly, do note that owing to how database object permissions work, this
  * Script needs to be run once per DB User as well as per Database.
  *
