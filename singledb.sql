@@ -67,7 +67,7 @@ UNION ALL
 
   SELECT 
     clock_timestamp(),
-    pg_size_pretty(octet_length(string_agg(lo_get(lo.oid),''))::bigint) AS Table_Size,
+    pg_size_pretty(SUM(octet_length(lo_get(lo.oid)))) AS Table_Size,
     pg_size_pretty(0::BIGINT), 
     pg_size_pretty(0::BIGINT), 
     pg_size_pretty(0::BIGINT), 
