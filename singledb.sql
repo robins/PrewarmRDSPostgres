@@ -41,6 +41,7 @@ WITH y AS (
     WHERE relacl IS NOT NULL
   ) a
   WHERE aclist ILIKE current_user || '%'
+    OR EXISTS (select 1 from pg_roles where rolname = current_user and a.relowner = pg_roles.oid LIMIT 1)
 )
  SELECT
     clock_timestamp(),
@@ -57,11 +58,10 @@ WITH y AS (
     n.nspname AS schema_name,
     c.relname AS relation_name
   FROM pg_catalog.pg_class c
-    LEFT JOIN y ON y.oid = c.oid
+    INNER JOIN y ON y.oid = c.oid
     LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
   WHERE c.relkind IN ('r', 'v', 'm', 'S', 'f')
     AND pg_catalog.pg_table_is_visible(c.oid)
-    AND (y.oid IS NOT NULL OR EXISTS (select 1 from pg_roles where rolname = current_user and c.relowner = pg_roles.oid LIMIT 1))
 
 UNION ALL
 
