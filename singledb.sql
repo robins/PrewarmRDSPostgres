@@ -19,8 +19,8 @@
  *
  * Notably, it tries to fetch all the following (associated to a DB User):
  * 1) Table / Materialized View etc.
- * 2) TOAST data related to the above relations (if any)
- * 3) Large Objects (if any)
+ * 2) Large Objects (if any)
+ * 3) For TOAST data prefetch (please see toast.sql)
  *
  * Importantly, do note that owing to how Postgres object permissions work,
  * this Script needs to be run once each per DB User / per Database. This can
@@ -34,14 +34,26 @@ SET statement_timeout TO 0;
 CREATE EXTENSION IF NOT EXISTS pg_prewarm;
 
 WITH y AS (
-  SELECT oid, aclist
+  -- List objects with SELECT privilege (for current_user)
+  SELECT oid
   FROM (
     SELECT oid, relowner, unnest(relacl)::TEXT as aclist
     FROM pg_class
     WHERE relacl IS NOT NULL
   ) a
   WHERE aclist ILIKE current_user || '%'
-    OR EXISTS (select 1 from pg_roles where rolname = current_user and a.relowner = pg_roles.oid LIMIT 1)
+
+  UNION
+
+  -- List objects owned by current_user
+  SELECT oid
+  FROM pg_class c
+  WHERE EXISTS (
+      SELECT 1
+      FROM pg_roles r
+      WHERE rolname = current_user
+        AND c.relowner = r.oid LIMIT 1
+      )
 )
  SELECT
     clock_timestamp(),
@@ -65,6 +77,7 @@ WITH y AS (
 
 UNION ALL
 
+  -- Fetch all lo objects
   SELECT 
     clock_timestamp(),
     pg_size_pretty(SUM(octet_length(lo_get(lo.oid)))) AS Table_Size,
