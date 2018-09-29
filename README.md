@@ -15,15 +15,13 @@ When this SQL is run against each Database in an RDS Postgres Instance, it force
 
 On a sample run (run on a pgbench database), my RDS Postgres instance returns this:
 
-┌───────────────────────────────┬────────────┬────────────────────┬─────────────────────┬───────────┬───────────────────┬─────────────┬──────────────────────┐
-│        clock_timestamp        │ table_size │ freespace_map_size │ visibility_map_size │ init_size │ blocks_prefetched │ schema_name │    relation_name     │
-├───────────────────────────────┼────────────┼────────────────────┼─────────────────────┼───────────┼───────────────────┼─────────────┼──────────────────────┤
-│ 2018-09-29 07:11:33.688139+00 │ 1281 MB    │ 344 kB             │ 48 kB               │ 0 bytes   │            163984 │ public      │ pgbench_accounts     │
-│ 2018-09-29 07:11:57.970511+00 │ 8192 bytes │ 24 kB              │ 8192 bytes          │ 0 bytes   │                 5 │ public      │ pgbench_branches     │
-│ 2018-09-29 07:11:57.970735+00 │ 0 bytes    │ 0 bytes            │ 0 bytes             │ 0 bytes   │                 0 │ public      │ pgbench_history      │
-│ 2018-09-29 07:11:57.970804+00 │ 48 kB      │ 24 kB              │ 8192 bytes          │ 0 bytes   │                10 │ public      │ pgbench_tellers      │
-│ 2018-09-29 07:11:57.971753+00 │ ¤          │ 0 bytes            │ 0 bytes             │ 0 bytes   │                 0 │ ¤           │ User's large objects │
-└───────────────────────────────┴────────────┴────────────────────┴─────────────────────┴───────────┴───────────────────┴─────────────┴──────────────────────┘
+|        clock_timestamp        | table_size | freespace_map_size | visibility_map_size | init_size | blocks_prefetched | schema_name |      table_name       |
+|-------------------------------|------------|--------------------|---------------------|-----------|-------------------|-------------|-----------------------|
+| 2018-09-29 07:11:33.688139+00 | 1281 MB    | 344 kB             | 48 kB               | 0 bytes   |            163984 | public      | pgbench_accounts     |
+| 2018-09-29 07:11:57.970511+00 | 8192 bytes | 24 kB              | 8192 bytes          | 0 bytes   |                 5 | public      | pgbench_branches     |
+| 2018-09-29 07:11:57.970735+00 | 0 bytes    | 0 bytes            | 0 bytes             | 0 bytes   |                 0 | public      | pgbench_history      |
+| 2018-09-29 07:11:57.970804+00 | 48 kB      | 24 kB              | 8192 bytes          | 0 bytes   |                10 | public      | pgbench_tellers      |
+| 2018-09-29 07:11:57.971753+00 | ¤          | 0 bytes            | 0 bytes             | 0 bytes   |                 0 | ¤           | User's large objects |
 (5 rows)
 
 ### Toast.SQL ###
@@ -35,27 +33,26 @@ SELECT
 FROM pg_class c
 WHERE reltoastrelid > 0
 ORDER BY 1;
-┌─────────────────────────────────────────────────────────┐
-│                       vacuum_sql                        │
-├─────────────────────────────────────────────────────────┤
-│ VACUUM FULL information_schema.sql_features;            │
-│ VACUUM FULL information_schema.sql_implementation_info; │
-│ VACUUM FULL information_schema.sql_languages;           │
-│ VACUUM FULL information_schema.sql_packages;            │
-│ VACUUM FULL information_schema.sql_parts;               │
-│ VACUUM FULL information_schema.sql_sizing;              │
-│ VACUUM FULL information_schema.sql_sizing_profiles;     │
-│ VACUUM FULL pg_catalog.pg_attrdef;                      │
-│ VACUUM FULL pg_catalog.pg_constraint;                   │
-│ VACUUM FULL pg_catalog.pg_db_role_setting;              │
-│ VACUUM FULL pg_catalog.pg_description;                  │
-│ VACUUM FULL pg_catalog.pg_proc;                         │
-│ VACUUM FULL pg_catalog.pg_rewrite;                      │
-│ VACUUM FULL pg_catalog.pg_seclabel;                     │
-│ VACUUM FULL pg_catalog.pg_shdescription;                │
-│ VACUUM FULL pg_catalog.pg_shseclabel;                   │
-│ VACUUM FULL pg_catalog.pg_statistic;                    │
-│ VACUUM FULL pg_catalog.pg_statistic_ext;                │
-│ VACUUM FULL pg_catalog.pg_trigger;                      │
-└─────────────────────────────────────────────────────────┘
+
+|                       vacuum_sql        
+|----------------------------------------------------------
+| VACUUM FULL information_schema.sql_features;            |
+| VACUUM FULL information_schema.sql_implementation_info; |
+| VACUUM FULL information_schema.sql_languages;           |
+| VACUUM FULL information_schema.sql_packages;            |
+| VACUUM FULL information_schema.sql_parts;               |
+| VACUUM FULL information_schema.sql_sizing;              |
+| VACUUM FULL information_schema.sql_sizing_profiles;     |
+| VACUUM FULL pg_catalog.pg_attrdef;                      |
+| VACUUM FULL pg_catalog.pg_constraint;                   |
+| VACUUM FULL pg_catalog.pg_db_role_setting;              |
+| VACUUM FULL pg_catalog.pg_description;                  |
+| VACUUM FULL pg_catalog.pg_proc;                         |
+| VACUUM FULL pg_catalog.pg_rewrite;                      |
+| VACUUM FULL pg_catalog.pg_seclabel;                     |
+| VACUUM FULL pg_catalog.pg_shdescription;                |
+| VACUUM FULL pg_catalog.pg_shseclabel;                   |
+| VACUUM FULL pg_catalog.pg_statistic;                    |
+| VACUUM FULL pg_catalog.pg_statistic_ext;                |
+| VACUUM FULL pg_catalog.pg_trigger;                      |
 (19 rows)
