@@ -8,7 +8,7 @@
  */
  
 SELECT 
-  'VACUUM FULL ' || relname || ';'
-FROM pg_class 
+  'VACUUM FULL ' || (SELECT nspname from pg_namespace n where n.oid = c.relnamespace) || '.' || relname || ';' 
+FROM pg_class c
 WHERE reltoastrelid > 0
 ORDER BY 1;
